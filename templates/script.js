@@ -150,7 +150,7 @@ async function handlePredict() {
         formData.append('image', imageUpload.files[0]);
 
         // Send to backend
-        const response = await fetch('http://127.0.0.1:8000/predict-age/', {
+        const response = await fetch('https://age-prediction-api-i9jh.onrender.com/predict', {
             method: 'POST',
             body: formData
         });
