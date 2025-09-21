@@ -2,6 +2,7 @@ services:
   - type: web
     name: age-prediction-api
     env: python
+    pythonVersion: 3.10.0
     region: oregon
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
@@ -19,4 +20,4 @@ services:
       - key: CORS_ORIGINS
         value: '["https://age-prediction-api.onrender.com"]'
     autoDeploy: true
-    healthCheckPath: /
+    healthCheckPath: /health
