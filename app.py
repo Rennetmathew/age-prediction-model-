@@ -11,13 +11,30 @@ import os
 from PIL import Image
 import io
 from sklearn.preprocessing import LabelEncoder
+from dotenv import load_dotenv
+from pathlib import Path
 
-app = FastAPI()
+# Load environment variables
+load_dotenv()
 
-# Enable CORS
+# Get environment variables with defaults
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+PORT = int(os.getenv("PORT", 8000))
+MODEL_PATH = Path(os.getenv("MODEL_PATH", "models"))
+GENERALIST_MODEL = os.getenv("GENERALIST_MODEL", "best_generalist_model.h5")
+SPECIALIST_MODEL = os.getenv("SPECIALIST_MODEL", "best_specialist_model.h5")
+CORS_ORIGINS = eval(os.getenv("CORS_ORIGINS", '["http://localhost:3000"]'))
+
+# Update FastAPI app configuration
+app = FastAPI(
+    title=os.getenv("APP_NAME", "Age Prediction API"),
+    debug=DEBUG
+)
+
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -65,16 +82,16 @@ async def load_models():
         print("✓ Feature extractor created")
         
         # Load the Generalist model
-        generalist_model = tf.keras.models.load_model('models/generalist_model.h5')
+        generalist_model = tf.keras.models.load_model(MODEL_PATH / GENERALIST_MODEL)
         print("✓ Generalist model loaded")
         
         # Load Label Encoder
-        with open('models/label_encoder.pkl', 'rb') as f:
+        with open(MODEL_PATH / 'label_encoder.pkl', 'rb') as f:
             label_encoder = pickle.load(f)
         print("✓ Label encoder loaded")
         
         # Load the Specialist model
-        specialist_model = tf.keras.models.load_model('models/specialist_model.h5')
+        specialist_model = tf.keras.models.load_model(MODEL_PATH / SPECIALIST_MODEL)
         print("✓ Specialist model loaded")
         
     except Exception as e:

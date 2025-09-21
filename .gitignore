@@ -1,6 +1,13 @@
 __pycache__/
 *.pyc
 .env
+.env.local
+.env.*.local
 .venv/
+*.h5
+*.npy
 models/*.h5
 models/*.npy
+models/vgg_face_weights.h5
+models/embeddings.npy
+models/labels.npy
