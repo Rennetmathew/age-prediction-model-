@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.env
+.venv/
+models/*.h5
+models/*.npy

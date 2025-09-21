@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGE-I - AI Powered Age Predictor</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@300;400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="nav-bar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="nav-brand">
+                    <span class="brand-icon">🤖</span>
+                    <span class="brand-name">AGE-I</span>
+                </div>
+                <div class="nav-links">
+                    <a href="#test" class="nav-link">Test Now</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Holographic Grid Background -->
+    <div class="holo-grid"></div>
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="holo-frame">
+                <div class="model-badge">AGE-I</div>
+                <h1 class="glitch-text">Wanna see how old do you look?</h1>
+                <p class="hero-subtitle">Ever wondered if you look younger or older than your actual age? Upload your photo and let our AGE-I model predict your biological age.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Upload Section -->
+    <section class="upload-section" id="test">
+        <div class="container">
+            <h2 class="section-title">Test AGE-I Now</h2>
+            <div class="upload-area">
+                <input type="file" id="imageUpload" accept="image/*" class="file-input">
+                <label for="imageUpload" class="upload-label" id="uploadLabel">
+                    <div class="upload-icon">📸</div>
+                    <span class="upload-text">Choose your photo</span>
+                </label>
+                <div class="image-preview" id="imagePreview">
+                    <img id="previewImage" alt="Uploaded image preview">
+                </div>
+                <button id="predictBtn" class="predict-btn" disabled>
+                    <span class="btn-text">Predict My Age</span>
+                    <div class="btn-glow"></div>
+                </button>
+                <p class="safety-text">🔒 We don't share your photos</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Instructions Section (Moved below Test section) -->
+    <section class="instructions" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title">How to Get Better Results</h2>
+            <div class="compact-rules">
+                <div class="rule-row">
+                    <span class="rule-item-compact correct">✅ Clear, well-lit photo facing camera</span>
+                    <span class="rule-item-compact wrong">❌ No sunglasses or masks</span>
+                </div>
+                <div class="rule-row">
+                    <span class="rule-item-compact wrong">❌ Avoid heavy makeup</span>
+                    <span class="rule-item-compact wrong">❌ No filters or editing</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="results-section" id="resultsSection">
+        <div class="container">
+            <h2 class="section-title">AGE-I Prediction Results</h2>
+            <div class="results-card">
+                <div class="prediction-display">
+                    <div class="age-result">
+                        <span class="age-number" id="predictedAge">--</span>
+                        <span class="age-label">Predicted Age</span>
+                    </div>
+                    <div class="confidence-result">
+                        <span class="confidence-number" id="confidenceScore">--%</span>
+                        <span class="confidence-label">Confidence</span>
+                    </div>
+                </div>
+                
+                <!-- Disclaimer/Warning -->
+                <div class="ai-disclaimer">
+                    <div class="disclaimer-icon">⚠</div>
+                    <p class="disclaimer-text">✨ Our AGE-I makes its best guess based on your photo, but it's not 100% accurate. Treat it as a fun insight, not a fact.</p>
+                </div>
+                
+                <p class="feedback-question" id="feedbackQuestion">Is this prediction accurate?</p>
+                <div class="feedback-buttons">
+                    <button id="yesBtn" class="feedback-btn yes-btn">
+                        <span id="yesBtnText">✨ Yes, this is my age</span>
+                    </button>
+                    <button id="noBtn" class="feedback-btn no-btn">
+                        <span id="noBtnText">🎯 No, my age is wrong</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Age Range Selection -->
+    <section class="age-range-section" id="ageRangeSection">
+        <div class="container">
+            <h2 class="section-title">What's your actual age range?</h2>
+            <div class="age-range-card">
+                <select id="ageRangeSelect" class="age-range-select">
+                    <option value="">Select your age range</option>
+                    <option value="0-10">0-10 years</option>
+                    <option value="10-20">10-20 years</option>
+                    <option value="20-30">20-30 years</option>
+                    <option value="30-40">30-40 years</option>
+                    <option value="40-50">40-50 years</option>
+                    <option value="50-60">50-60 years</option>
+                    <option value="60-70">60-70 years</option>
+                    <option value="70-80">70-80 years</option>
+                    <option value="80-90">80-90 years</option>
+                    <option value="90-100">90-100 years</option>
+                </select>
+                <button id="predictAgainBtn" class="predict-again-btn" disabled>
+                    <span>🔮 Predict Again</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Actual Age Input Section -->
+    <section class="actual-age-section" id="actualAgeSection">
+        <div class="container">
+            <h2 class="section-title">Tell us your exact age</h2>
+            <div class="actual-age-card">
+                <input type="number" id="actualAgeInput" placeholder="Enter your age" min="1" max="100" class="age-input">
+                <button id="submitAgeBtn" class="submit-age-btn" disabled>
+                    <span>📝 Submit Feedback</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modals -->
+    <!-- Success Modal (First Yes) -->
+    <div id="successModal" class="modal">
+        <div class="modal-content success-modal">
+            <span class="close-modal" id="closeSuccessModal">&times;</span>
+            <div class="modal-body" id="successModalBody">
+                <!-- Content will be inserted by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Second Success Modal (Second Yes) -->
+    <div id="secondSuccessModal" class="modal">
+        <div class="modal-content success-modal">
+            <span class="close-modal" id="closeSecondSuccessModal">&times;</span>
+            <div class="modal-body" id="secondSuccessModalBody">
+                <!-- Content will be inserted by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Give Another Chance Modal -->
+    <div id="anotherChanceModal" class="modal">
+        <div class="modal-content info-modal">
+            <span class="close-modal" id="closeAnotherChanceModal">&times;</span>
+            <div class="modal-body">
+                <h3>Give AGE-I another chance? 🤖</h3>
+                <p>✨ Our AGE-I makes its best guess based on your photo, but it's not 100% accurate. Treat it as a fun insight, not a fact.</p>
+                <p>Would you like to help us improve our prediction?</p>
+                <div class="modal-buttons">
+                    <button id="tryAgainBtn" class="modal-btn modal-btn-yes">
+                        <span>✨ Yes, try again</span>
+                    </button>
+                    <button id="tellAgeBtn" class="modal-btn modal-btn-no">
+                        <span>📝 No, I'll tell you my age</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thanks Modal -->
+    <div id="thanksModal" class="modal">
+        <div class="modal-content thanks-modal">
+            <span class="close-modal" id="closeThanksModal">&times;</span>
+            <div class="modal-body">
+                <h3>Thank you for your feedback! 🙏</h3>
+                <p>Your input helps us improve AGE-I's prediction accuracy.</p>
+                <p>Keep exploring and have fun with our age predictor! ✨</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
