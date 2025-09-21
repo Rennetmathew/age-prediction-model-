@@ -13,6 +13,9 @@ import io
 from sklearn.preprocessing import LabelEncoder
 from dotenv import load_dotenv
 from pathlib import Path
+import datetime
+import logging
+from fastapi.logger import logger
 
 # Load environment variables
 load_dotenv()
@@ -43,6 +46,17 @@ app.add_middleware(
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/templates", StaticFiles(directory="templates"), name="templates")
+
+# Configure logging based on environment
+if os.getenv("DEBUG", "False").lower() == "true":
+    logging.basicConfig(level=logging.DEBUG)
+    logger.setLevel(logging.DEBUG)
+else:
+    logging.basicConfig(level=logging.INFO)
+    logger.setLevel(logging.INFO)
+
+logger.info(f"Starting application in {'debug' if DEBUG else 'production'} mode")
+logger.info(f"Running on port {PORT}")
 
 # Define age groups to match training (4 groups)
 AGE_GROUPS = {
@@ -75,27 +89,27 @@ async def load_models():
     global feature_extractor, generalist_model, specialist_model, label_encoder
     
     try:
-        print("Loading models...")
+        logger.info("Loading models...")
         # Create feature extractor model
         feature_extractor = create_feature_extractor()
         feature_extractor.trainable = False
-        print("✓ Feature extractor created")
+        logger.info("✓ Feature extractor created")
         
         # Load the Generalist model
         generalist_model = tf.keras.models.load_model(MODEL_PATH / GENERALIST_MODEL)
-        print("✓ Generalist model loaded")
+        logger.info("✓ Generalist model loaded")
         
         # Load Label Encoder
         with open(MODEL_PATH / 'label_encoder.pkl', 'rb') as f:
             label_encoder = pickle.load(f)
-        print("✓ Label encoder loaded")
+        logger.info("✓ Label encoder loaded")
         
         # Load the Specialist model
         specialist_model = tf.keras.models.load_model(MODEL_PATH / SPECIALIST_MODEL)
-        print("✓ Specialist model loaded")
+        logger.info("✓ Specialist model loaded")
         
     except Exception as e:
-        print(f"Error loading models: {str(e)}")
+        logger.error(f"Error loading models: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error loading models: {str(e)}")
 
 def preprocess_image(image_bytes):
@@ -127,7 +141,7 @@ def preprocess_image(image_bytes):
         return img_array
         
     except Exception as e:
-        print(f"Error in image preprocessing: {str(e)}")
+        logger.error(f"Error in image preprocessing: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Error processing image: {str(e)}")
 
 @app.get("/", response_class=HTMLResponse)
@@ -150,50 +164,50 @@ async def predict_age(image: UploadFile = File(...)):
             contents = await image.read()
             processed_image = preprocess_image(contents)
         except Exception as e:
-            print(f"Error preprocessing image: {str(e)}")
+            logger.error(f"Error preprocessing image: {str(e)}")
             raise HTTPException(status_code=400, detail=f"Image preprocessing error: {str(e)}")
         
         # Step 2: Extract features
         try:
-            print("\nExtracting features...")
+            logger.info("\nExtracting features...")
             features = feature_extractor(processed_image, training=False)
-            print(f"Features shape: {features.shape}")
+            logger.debug(f"Features shape: {features.shape}")
         except Exception as e:
-            print(f"Error extracting features: {str(e)}")
+            logger.error(f"Error extracting features: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Feature extraction error: {str(e)}")
         
         # Step 3: Get age group prediction from generalist model
         try:
-            print("\nPredicting age group...")
+            logger.info("\nPredicting age group...")
             range_prediction = generalist_model(features, training=False)
             predicted_range_idx = np.argmax(range_prediction[0])
             predicted_range = label_encoder.inverse_transform([predicted_range_idx])[0]
-            print(f"Predicted age group: {predicted_range}")
+            logger.info(f"Predicted age group: {predicted_range}")
             
             # Get the bounds for predicted age range
             min_age, max_age = AGE_GROUPS[predicted_range]
-            print(f"Age range bounds: {min_age}-{max_age}")
+            logger.info(f"Age range bounds: {min_age}-{max_age}")
         except Exception as e:
-            print(f"Error in generalist model prediction: {str(e)}")
+            logger.error(f"Error in generalist model prediction: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Age group prediction error: {str(e)}")
         
         # Step 4: Get specific age prediction from specialist model
         try:
-            print("\nPredicting specific age...")
+            logger.info("\nPredicting specific age...")
             age_group_one_hot = tf.keras.utils.to_categorical([predicted_range_idx], num_classes=len(AGE_GROUPS))
             specialist_inputs = [features, age_group_one_hot]
             age_prediction = specialist_model(specialist_inputs, training=False)
             
             # Get raw prediction and convert to relative position
             raw_output = float(age_prediction[0][0])
-            print(f"Raw specialist output: {raw_output}")
+            logger.info(f"Raw specialist output: {raw_output}")
             
             # Print age group probabilities
-            print("\nAge Group Probabilities:")
+            logger.info("\nAge Group Probabilities:")
             group_probs = []
             for i, prob in enumerate(range_prediction[0]):
                 group_name = label_encoder.inverse_transform([i])[0]
-                print(f"{group_name}: {prob:.4f}")
+                logger.info(f"{group_name}: {prob:.4f}")
                 group_probs.append(float(prob))
             
             # Normalize features before prediction
@@ -219,10 +233,10 @@ async def predict_age(image: UploadFile = File(...)):
             confidence = float(group_confidence * boundary_penalty * 100)
             confidence = min(95.0, max(10.0, confidence))
             
-            print(f"\nPrediction Results:")
-            print(f"Age: {predicted_age}")
-            print(f"Group: {predicted_range}")
-            print(f"Confidence: {confidence:.1f}%")
+            logger.info(f"\nPrediction Results:")
+            logger.info(f"Age: {predicted_age}")
+            logger.info(f"Group: {predicted_range}")
+            logger.info(f"Confidence: {confidence:.1f}%")
             
             # Verify outputs are valid
             if np.isnan(predicted_age) or np.isnan(confidence):
@@ -239,7 +253,7 @@ async def predict_age(image: UploadFile = File(...)):
             error_msg = str(e)
             if not error_msg:
                 error_msg = "Unknown error during prediction"
-            print(f"Error in final prediction step: {error_msg}")
+            logger.error(f"Error in final prediction step: {error_msg}")
             raise HTTPException(status_code=500, detail=f"Age prediction error: {error_msg}")
             
     except HTTPException as he:
@@ -250,8 +264,13 @@ async def predict_age(image: UploadFile = File(...)):
         error_msg = str(e)
         if not error_msg:
             error_msg = "Unexpected error during prediction"
-        print(f"Unexpected error: {error_msg}")
+        logger.error(f"Unexpected error: {error_msg}")
         raise HTTPException(status_code=500, detail=error_msg)
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for Render"""
+    return {"status": "healthy", "timestamp": datetime.datetime.now().isoformat()}
 
 if __name__ == "__main__":
     import uvicorn
