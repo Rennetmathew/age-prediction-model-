@@ -253,7 +253,7 @@ function handlePredict() {
     const formData = new FormData();
     formData.append('image', file);
 
-    fetch('http://127.0.0.1:8003/predict-age/', {
+    fetch('https://age-prediction-api-i9jh.onrender.com/predict-age/', {
         method: 'POST',
         body: formData
     })
